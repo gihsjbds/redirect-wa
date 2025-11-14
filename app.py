@@ -56,6 +56,10 @@ HTML_TEMPLATE = """<!doctype html>
 def home():
     return render_template_string(HTML_TEMPLATE.replace('{{ group_id }}', 'N/A'))
 
+@app.route('/health')
+def health():
+    return {'status': 'ok'}, 200
+
 def is_mobile():
     """Check if user agent is mobile device"""
     user_agent = request.headers.get('User-Agent', '').lower()
@@ -174,9 +178,14 @@ def redirect_group(group_id):
     
     return render_template_string(HTML_TEMPLATE.replace('{{ group_id }}', group_id))
 
+@app.errorhandler(404)
+def not_found(e):
+    return render_template_string(HTML_TEMPLATE.replace('{{ group_id }}', 'N/A')), 404
+
+# For Railway/production deployment
+port = int(os.getenv('PORT', 3000))
+debug = os.getenv('FLASK_ENV') != 'production'
+
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 3000))
-    # Disable debug in production
-    debug = os.getenv('FLASK_ENV') != 'production'
     app.run(host='0.0.0.0', port=port, debug=debug)
 
